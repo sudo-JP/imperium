@@ -1,27 +1,20 @@
-use std::{fs::DirEntry, os::unix::fs::{MetadataExt, PermissionsExt}, path::{Path, PathBuf}};
-use chrono::prelude::{DateTime, Utc};
+use std::{fs::DirEntry, os::unix::fs::PermissionsExt, path::{Path, PathBuf}};
 use anyhow::{Result};
 use std::fs;
 use devicons::FileIcon;
 
 pub struct DEntry {
     pub user_perm: u32,
-    pub group_perm: u32, 
-    pub other_perm: u32,
-    pub hardlinks: u64,
     pub size: u64,
-    pub mdate: DateTime<Utc>, 
     pub name: String,
+    pub symlink: Option<PathBuf>,
 
-    pub is_symlink: bool,
     pub is_dir: bool,
     pub is_exec: bool,
 
     pub icon: FileIcon,
 }
 
-const OTHER_PERM: u32 = 0o007;
-const GROUP_PERM: u32 = 0o070;
 const USER_PERM: u32 = 0o700;
 const EXECUTABLE: u32 = 0o100;
 
@@ -41,7 +34,6 @@ impl DEntry {
     fn from_path(path: &Path, name: &str) -> Result<Self> {
         let metadata = fs::metadata(path)?;
         let perms = metadata.permissions().mode();
-        let mdate: DateTime<Utc> = metadata.modified()?.into();
 
         let is_dir = metadata.is_dir();
 
@@ -51,16 +43,15 @@ impl DEntry {
             .unwrap_or("");
         let icon = extension_icon(name, &ext, is_dir);
 
+        let symlink_meta = fs::symlink_metadata(path)?;
         Ok(Self {
             user_perm: perms & USER_PERM,
-            group_perm: perms & GROUP_PERM,
-            other_perm: perms & OTHER_PERM,
-            hardlinks: metadata.nlink(),
             size: metadata.len(),
-            mdate,
             name: name.to_string(),
 
-            is_symlink: metadata.is_symlink(),
+            symlink: if symlink_meta.file_type().is_symlink() {
+                fs::read_link(path).ok()
+            } else { None },
             is_dir,
             is_exec: (perms & EXECUTABLE) != 0,
 

@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.102"
-chrono = "0.4.44"
 clap = { version = "4.5.60", features = ["derive"] }
 devicons = "0.6.12"
 owo-colors = "4.3.0"
