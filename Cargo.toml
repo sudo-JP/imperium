@@ -7,5 +7,6 @@ edition = "2024"
 anyhow = "1.0.102"
 chrono = "0.4.44"
 clap = { version = "4.5.60", features = ["derive"] }
-file-owner = "0.1.2"
+devicons = "0.6.12"
 owo-colors = "4.3.0"
+tabled = { version = "0.20", features = ["ansi", "std"] }
