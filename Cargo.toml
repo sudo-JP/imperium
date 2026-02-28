@@ -7,5 +7,7 @@ edition = "2024"
 anyhow = "1.0.102"
 clap = { version = "4.5.60", features = ["derive"] }
 devicons = "0.6.12"
+git2 = "0.20.4"
 owo-colors = "4.3.0"
 tabled = { version = "0.20", features = ["ansi", "std"] }
+terminal_size = "0.4.3"
