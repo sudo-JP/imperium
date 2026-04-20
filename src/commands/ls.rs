@@ -35,7 +35,7 @@ fn extension_icon(name: &str, ext: &str, is_dir: bool) -> FileIcon {
 
 impl DEntry {
     fn from_path(path: &Path, name: &str, gitmap: &HashMap<String, Status>)-> Result<Self> {
-        let metadata = fs::metadata(path)?;
+        let metadata = fs::symlink_metadata(path)?;
         let perms = metadata.permissions().mode();
 
         let is_dir = metadata.is_dir();
@@ -47,9 +47,10 @@ impl DEntry {
         let icon = extension_icon(name, &ext, is_dir);
 
         let symlink_meta = fs::symlink_metadata(path)?;
+        let size = fs::metadata(path).map(|m| m.len()).unwrap_or(0);
         Ok(Self {
             user_perm: perms & USER_PERM,
-            size: metadata.len(),
+            size,
             name: name.to_string(),
 
             symlink: if symlink_meta.file_type().is_symlink() {
